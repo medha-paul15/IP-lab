@@ -1,0 +1,51 @@
+import os
+import cv2
+import numpy as np
+
+# 1. Path Setup (provided)
+script_dir = os.path.dirname(os.path.abspath(__file__))
+image_path = os.path.join(script_dir, "photos/cat1.png")
+
+# Load the image
+img = cv2.imread(image_path)
+
+if img is None:
+    print(f"Error: Could not load image at {image_path}")
+else:
+    # --- 2. Apply Blur (Gaussian Blur) ---
+    # (5, 5) is the kernel size; 0 lets OpenCV calculate sigma automatically
+    blurred_img = cv2.GaussianBlur(img, (5, 5), 0)
+
+    # --- 3. Apply Noise (Gaussian Noise) ---
+    # Generate random noise with the same shape as the image
+    mean = 0
+    sigma = 25  # Control noise intensity
+    gaussian_noise = np.random.normal(mean, sigma, img.shape).astype('int16')
+    
+    # Add noise to original image and clip values to maintain [0, 255] range
+    noisy_img = img.astype('int16') + gaussian_noise
+    noisy_img = np.clip(noisy_img, 0, 255).astype('uint8')
+
+    # --- 4. Apply Log Transformation ---
+    img_float = np.float32(img)
+    c = 255 / np.log(1 + np.max(img_float))
+    log_img = c * np.log(1 + img_float)
+    log_img = np.array(log_img, dtype=np.uint8)
+
+    # --- 5. Apply Gamma Transformation ---
+    gamma = 0.5  # Values < 1 brighten; > 1 darken
+    inv_gamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
+    gamma_img = cv2.LUT(img, table)
+
+    # --- 6. Save or Display Results ---
+    # Display side-by-side versions using cv2 windows
+    cv2.imshow("Original", img)
+    cv2.imshow("Blurred (5x5)", blurred_img)
+    cv2.imshow("Noisy (Gaussian)", noisy_img)
+    cv2.imshow("Log Transformed", log_img)
+    cv2.imshow("Gamma Corrected (g=0.5)", gamma_img)
+
+    print("Press any key on an image window to exit.")
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
