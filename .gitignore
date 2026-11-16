@@ -1,0 +1,6 @@
+.vscode/
+__pycache__/
+*.pyc
+*_outputs/
+tempCodeRunnerFile.python
+.DS_Store

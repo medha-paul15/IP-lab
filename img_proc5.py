@@ -1,0 +1,1 @@
+#averaging filter: spatial filtering technique that replaces each pixel's value with the mathematical average of its neighboring pixels within a defined window
